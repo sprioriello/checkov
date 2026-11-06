@@ -170,7 +170,8 @@ class KubernetesLocalGraph(LocalGraph[KubernetesBlock]):
             if not template.get('apiVersion'):
                 template['apiVersion'] = conf.get('apiVersion')
 
-            template_metadata = template.get('metadata')
+            # is_invalid_k8_pod_definition() ensures, that the metadata is a dict
+            template_metadata: Dict[str, Any] = template['metadata']
 
             template_namespace = template_metadata.get('namespace')
             metadata_namespace = metadata.get('namespace')

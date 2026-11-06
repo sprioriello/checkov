@@ -104,15 +104,15 @@ class NodeConstructor(SafeConstructor):
     # laziness we omit this behaviour (and will only do "deep
     # construction") by first exhausting iterators, then yielding
     # copies.
-    def construct_yaml_map(self, node: MappingNode) -> DictNode:
+    def construct_yaml_map(self, node: MappingNode) -> DictNode:  # type:ignore[override]  # eager, see above
         # Check for duplicate keys on the current level, this is not desirable
         # because a dict does not support this. It overwrites it with the last
         # occurrence, which can give unexpected results
         mapping = {}
         self.flatten_mapping(node)
         for key_node, value_node in node.value:
-            key = self.construct_object(key_node, False)  # type:ignore[no-untyped-call]
-            value = self.construct_object(value_node, False)  # type:ignore[no-untyped-call]
+            key = self.construct_object(key_node, False)
+            value = self.construct_object(value_node, False)
             try:
                 if isinstance(key, dict):
                     key = frozenset(key.keys()), frozenset(key.values())
@@ -134,11 +134,11 @@ class NodeConstructor(SafeConstructor):
                 )
             mapping[key] = value
 
-        obj, = SafeConstructor.construct_yaml_map(self, node)  # type:ignore[no-untyped-call]
+        obj, = SafeConstructor.construct_yaml_map(self, node)
         return DictNode(obj, node.start_mark, node.end_mark)
 
     def construct_yaml_str(self, node: ScalarNode) -> StrNode:
-        obj = SafeConstructor.construct_yaml_str(self, node)  # type:ignore[no-untyped-call]
+        obj = SafeConstructor.construct_yaml_str(self, node)
         assert isinstance(obj, str)  # nosec
         return StrNode(obj, node.start_mark, node.end_mark)
 
@@ -155,7 +155,7 @@ class NodeConstructor(SafeConstructor):
                 self.mark_with_filename(k, filename)
                 self.mark_with_filename(v, filename)
 
-    def construct_yaml_seq(self, node: SequenceNode) -> ListNode:
+    def construct_yaml_seq(self, node: SequenceNode) -> ListNode:  # type:ignore[override]  # eager, see above
         # Handle serverless file() expansions on SequenceNode
         if isinstance(node.value, list) and len(node.value) > 0:
             for i, v in enumerate(node.value):
@@ -180,7 +180,7 @@ class NodeConstructor(SafeConstructor):
                     node.value[i] = MarkedLoader(content, m[1], None).get_single_node()
                     self.mark_with_filename(node.value[i], m[1])
 
-        obj, = SafeConstructor.construct_yaml_seq(self, node)  # type:ignore[no-untyped-call]
+        obj, = SafeConstructor.construct_yaml_seq(self, node)
         assert isinstance(obj, list)  # nosec
         return ListNode(obj, node.start_mark, node.end_mark)  # nosec
 
@@ -273,7 +273,7 @@ def loads(yaml_string: str, fname: str, content_type: ContentType | None = None)
         return {}
 
     loader = MarkedLoader(yaml_string, fname, content_type)
-    loader.add_multi_constructor('!', multi_constructor)  # type:ignore[no-untyped-call]
+    loader.add_multi_constructor('!', multi_constructor)
 
     try:
         template: "DictNode | dict[str, Any]" = loader.get_single_data()
