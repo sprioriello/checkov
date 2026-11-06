@@ -150,7 +150,9 @@ class Prompt():
             if "prompt_if" not in v or v["prompt_if"] == prompt_if:
                 # Prompt the user
                 text = cast(str, v["text"])
-                p = click.prompt(text, type=v["type"], default=v["default"])
+                prompt_type: Any = v["type"]
+                prompt_default: Any = v["default"]
+                p: Any = click.prompt(text, type=prompt_type, default=prompt_default)
 
                 # Create the action on our object
                 if k == 'chosen_action':
