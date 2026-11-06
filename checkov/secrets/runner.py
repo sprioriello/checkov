@@ -475,11 +475,12 @@ class Runner(BaseRunner[None, None, None]):
             if isinstance(secret.secret_value, str) and secret.secret_value:
                 stripped = secret.secret_value.strip(',";\'')
                 if stripped != secret.secret_value:
-                    secret_key = f'{key}_{secret.line_number}_{PotentialSecret.hash_secret(stripped)}'
+                    stripped_hash = PotentialSecret.hash_secret(stripped)
+                    secret_key = f'{key}_{secret.line_number}_{stripped_hash}'
             if secret.secret_value and is_potential_uuid(
                     secret.secret_value) and secret.check_id not in secrets_in_uuid_form:
-                logging.info(
-                    f"Removing secret due to UUID filtering: {PotentialSecret.hash_secret(secret.secret_value)}")
+                secret_hash = PotentialSecret.hash_secret(secret.secret_value)
+                logging.info(f"Removing secret due to UUID filtering: {secret_hash}")
                 continue
             bc_check_id = metadata_integration.get_bc_id(check_id)
             if bc_check_id in secret_suppressions_ids:
